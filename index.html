@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./style.css">
+    <link rel="shortcut icon" href="./images/tic-tac-toe.svg">
+    <title>Tic Tac Toe</title>
+</head>
+<body>
+    <form onsubmit="return false">
+        <fieldset>
+            <legend>Configure player 1</legend>
+
+            <div class="type">
+                <div>
+                    <input type="radio" name="player1-type" id="player1-human" required>
+                    <label for="player1-computer">Human</label>
+                </div>
+                <div>
+                    <input type="radio" name="player1-type" id="player1-computer">
+                    <label for="player1-computer">Computer</label>
+                </div>
+            </div>
+            <div class="team">
+                <div>
+                    <div>X starts first</div>
+                </div>
+                <div>
+                    <div>
+                        <input type="radio" name="player1-symbol" id="player1-symbol-x" checked required>
+                        <label for="player1-symbol-x">X</label>
+                    </div>
+                    <div>
+                        <input type="radio" name="player1-symbol" id="player1-symbol-o">
+                        <label for="player1-symbol-o">O</label>
+                    </div>
+                </div>
+            </div>
+            <div class="name">
+                <label for="player1-name">Player name: </label>
+                <input type="text" placeholder="Name" value="Player1" onclick="this.select()" name="player1-name" id="player1-name" required autocomplete="off">    
+            </div>
+            <div class="difficulty">
+                <label for="player1-difficulty">Difficulty: </label>
+                <select name="player1-difficulty" id="player1-difficulty" disabled>
+                    <option value="easy">Easy</option>
+                    <option value="normal">Normal</option>
+                    <option value="hard">Hard</option>
+                    <option value="impossible">Impossible</option>
+                </select>
+            </div>
+        </fieldset>
+        
+        <div>VS</div>
+
+        <fieldset>
+            <legend>Configure player 2</legend>
+
+            <div class="type">
+                <div>
+                    <input type="radio" name="player2-type" id="player2-human" required>
+                    <label for="player2-human">Human</label>
+                </div>
+                <div>
+                    <input type="radio" name="player2-type" id="player2-computer">
+                    <label for="player2-computer">Computer</label>
+                </div>
+            </div>
+            <div class="team">
+                <div>
+                    <div>X starts first</div>
+                </div>
+                <div>
+                    <div>
+                        <input type="radio" name="player2-symbol" id="player2-symbol-x" required>
+                        <label for="player2-symbol-x">X</label>
+                    </div>
+                    <div>
+                        <input type="radio" name="player2-symbol" id="player2-symbol-o" checked>
+                        <label for="player2-symbol-o">O</label>
+                    </div>
+                </div>
+            </div>
+            <div class="name">
+                <label for="player2-name">Player name: </label>
+                <input type="text" placeholder="Name" value="Player2" onclick="this.select()" name="player2-name" id="player2-name" required autocomplete="off">    
+            </div>
+            <div class="difficulty">
+                <label for="player2-difficulty">Difficulty: </label>
+                <select name="player2-difficulty" id="player2-difficulty" disabled>
+                    <option value="easy">Easy</option>
+                    <option value="normal">Normal</option>
+                    <option value="hard">Hard</option>
+                    <option value="impossible">Impossible</option>
+                </select>
+            </div>
+        </fieldset>
+
+        <button type="submit">Play</button>
+    </form>
+    <div>
+        <header><h1>Tic Tac Toe</h1></header>
+        <main>
+            <div class="players">
+                <div class="player1-info"></div>
+                <div class="player2-info"></div>
+            </div>
+            <div class="board">
+                <button data-index="0"></button>
+                <button data-index="1"></button>
+                <button data-index="2"></button>
+                <button data-index="3"></button>
+                <button data-index="4"></button>
+                <button data-index="5"></button>
+                <button data-index="6"></button>
+                <button data-index="7"></button>
+                <button data-index="8"></button>
+            </div>
+            <div class="button-container">
+                <button>Start</button>
+            </div>
+            <div class="winner"></div>
+        </main>
+        <footer>
+            <div>
+                <div class="copyright">Copyright</div>
+                <a href="https://github.com/TITANIUM339" target="_blank"><img src="./images/github.svg" alt="github icon"></a>
+            </div>
+            <script>
+                document.querySelector(".copyright").innerHTML = `Copyright &#169; TITANIUM339 ${new Date().getFullYear()}`;
+            </script>
+        </footer>
+    </div>
+    
+    <script src="./script.js"></script>
+</body>
+</html>
