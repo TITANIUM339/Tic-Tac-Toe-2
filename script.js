@@ -311,6 +311,7 @@ function createPlayer(name, type, team, difficulty) {
 
     function resetPlayerTurn() {
         playerTurn = team === "X"? true:false;
+        playerDisplay.style.borderBottom = playerTurn? "4px solid #F7E987":"none";
     }
 
     function getTeam() {
