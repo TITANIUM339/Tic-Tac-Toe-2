@@ -162,6 +162,9 @@ const game = (function() {
             // Stop game.
             gameRunning = false;
         }
+
+        player1.resetPlayerTurn();
+        player2.resetPlayerTurn();
     
         const boardContainer = document.querySelector(".board");
 
@@ -306,6 +309,10 @@ function createPlayer(name, type, team, difficulty) {
         return playerTurn;
     }
 
+    function resetPlayerTurn() {
+        playerTurn = team === "X"? true:false;
+    }
+
     function getTeam() {
         return team;
     }
@@ -443,7 +450,7 @@ function createPlayer(name, type, team, difficulty) {
         }
     }
 
-    return {play, getName, getType, changeTurn, isPlayerTurn, getTeam};
+    return {play, getName, getType, changeTurn, resetPlayerTurn, isPlayerTurn, getTeam};
 }
 
 // This module handles form and user input logic.
@@ -475,8 +482,7 @@ const form = (function() {
     });
 
     // Shows the form when user clicks on the start/restart button.
-    const startButton = document.querySelector(".button-container>button");
-    startButton.addEventListener("click", function(event) {
+    document.querySelector(".start").addEventListener("click", function(event) {
         event.stopPropagation();
         focusForm();
     });
@@ -513,6 +519,16 @@ const form = (function() {
     player2SymbolX.addEventListener("click", function() {
         player1SymbolO.checked = true;
     });
+
+    let player1;
+    let player2;
+
+    const restartButton = document.querySelector(".restart");
+    restartButton.addEventListener("click", function (event) {
+        event.stopPropagation();
+
+        game.start(player1, player2);
+    });
     
     // Starts the game if the form is valid.
     document.querySelector("form>button").addEventListener("mousedown", function() {
@@ -524,10 +540,10 @@ const form = (function() {
             let player1Difficulty = document.querySelector("#player1-difficulty").value, player2Difficulty = document.querySelector("#player2-difficulty").value;
 
             // Creates 2 players.
-            let player1 = createPlayer(player1Name, player1Type, player1Team, player1Difficulty);
-            let player2 = createPlayer(player2Name, player2Type, player2Team, player2Difficulty);
+            player1 = createPlayer(player1Name, player1Type, player1Team, player1Difficulty);
+            player2 = createPlayer(player2Name, player2Type, player2Team, player2Difficulty);
 
-            startButton.innerText = "Restart";
+            restartButton.style.display = "block";
 
             unfocusForm();
 

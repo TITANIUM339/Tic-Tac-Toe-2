@@ -71,6 +71,7 @@ main {
     display: flex;
     justify-content: center;
     margin-top: 25px;
+    gap: 20px;
 }
 
 .button-container>button {
@@ -85,6 +86,10 @@ main {
 
 .button-container>button:active {
     background-color: #93B1A6;
+}
+
+.restart {
+    display: none;
 }
 
 form {
