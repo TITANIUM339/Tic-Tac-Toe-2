@@ -140,35 +140,41 @@ const game = (function() {
 
     let gameRunning = false;
 
-    function start(player1, player2) {
-        // Stops the game and displays the game result.
-        function stop() {
-            let winner = gameBoard.getWinner();
-    
-            // Display game result.
-            if (winner === player1.getTeam()) {
-                winnerDisplay.innerText = `${player1.getName()} Wins! 🎉`;
-                gameBoard.highlightLine();
-            } else if (winner === player2.getTeam()) {
-                winnerDisplay.innerText = `${player2.getName()} Wins! 🎉`;
-                gameBoard.highlightLine();
-            } else {
-                winnerDisplay.innerText = "Tie!";
-            }
-    
-            // UnHighlight the player displays. 
-            document.querySelector(".player1-info").style.borderBottom = document.querySelector(".player2-info").style.borderBottom = "none";
-    
-            // Stop game.
-            gameRunning = false;
+    let asyncStuff = false;
+
+    function isDoingAsyncStuff() {
+        return asyncStuff;
+    }
+
+    // Stops the game and displays the game result.
+    function stop(player1, player2) {
+        let winner = gameBoard.getWinner();
+
+        // Display game result.
+        if (winner === player1.getTeam()) {
+            winnerDisplay.innerText = `${player1.getName()} Wins! 🎉`;
+            gameBoard.highlightLine();
+        } else if (winner === player2.getTeam()) {
+            winnerDisplay.innerText = `${player2.getName()} Wins! 🎉`;
+            gameBoard.highlightLine();
+        } else {
+            winnerDisplay.innerText = "Tie!";
         }
+
+        // UnHighlight the player displays.
+        document.querySelector(".player1-info").style.borderBottom = document.querySelector(".player2-info").style.borderBottom = "none";
+
+        // Stop game.
+        gameRunning = false;
+    }
+
+    const boardContainer = document.querySelector(".board");
+
+    function start(player1, player2) {
+        gameRunning = true;
 
         player1.resetPlayerTurn();
         player2.resetPlayerTurn();
-    
-        const boardContainer = document.querySelector(".board");
-
-        gameRunning = true;
         gameBoard.resetBoard();
         // Clear winner display.
         winnerDisplay.innerText = "";
@@ -205,46 +211,68 @@ const game = (function() {
                     }
 
                     gameBoard.renderBoard();
-                    
+
                     // Stop the game if it has ended.
-                    if (gameBoard.terminal()) stop();
+                    if (gameBoard.terminal()) stop(player1, player2);
                 });
             });
         // Computer vs Computer.
         } else if (player1Type === "c" && player2Type === "c") {
             if (!gameRunning) return;
-            
-            // Keep looping until the game is over.
-            do {
-                // Computer makes move.
-                if (player1.isPlayerTurn()) {
-                    player1.play();
-                    player2.changeTurn();
-                } else {
-                    player2.play();
-                    player1.changeTurn();
-                }
 
-                gameBoard.renderBoard();
-            } while (!gameBoard.terminal());
+            asyncStuff = true;
+            (async function() {
+                // Keep looping until the game is over.
+                do {
+                    await new Promise(function (resolve) {
+                        setTimeout(resolve, 500);
+                    });
+                    
+                    // Computer makes move.
+                    if (player1.isPlayerTurn()) {
+                        player1.play();
+                        player2.changeTurn();
+                    } else {
+                        player2.play();
+                        player1.changeTurn();
+                    }
 
-            stop();
+                    gameBoard.renderBoard();
+                } while (!gameBoard.terminal());
+
+                asyncStuff = false;
+                stop(player1, player2);
+            })();
         // Human vs computer.
         } else {
             // If its the computers turn it will make the first move.
             if (player1Type === "c") {
                 if (player1.isPlayerTurn()) {
-                    player1.play();
-                    player2.changeTurn();
+                    asyncStuff = true;
+
+                    setTimeout(function() {
+                        asyncStuff = false;
+
+                        player1.play();
+                        player2.changeTurn();
+
+                        gameBoard.renderBoard();
+                    }, 500);
                 }
             } else {
                 if (player2.isPlayerTurn()) {
-                    player2.play();
-                    player1.changeTurn();
+                    asyncStuff = true;
+
+                    setTimeout(function () {
+                        asyncStuff = false;
+
+                        player2.play();
+                        player1.changeTurn();
+
+                        gameBoard.renderBoard();
+                    }, 500);
                 }
             }
-
-            gameBoard.renderBoard();
 
             document.querySelectorAll(".board>button").forEach(element => {
                 element.addEventListener("click", function() {
@@ -252,29 +280,47 @@ const game = (function() {
 
                     if (player1Type === "h") {
                         // Human makes a move.
-                        if (player1.play(element.dataset.index)) {
+                        if (player1.isPlayerTurn() && player1.play(element.dataset.index)) {
                             player2.changeTurn();
+
                             // Computer makes a move.
-                            player2.play();
-                            player1.changeTurn();
+                            asyncStuff = true;
+                            setTimeout(function () {
+                                asyncStuff = false;
+
+                                player2.play();
+                                player1.changeTurn();
+
+                                gameBoard.renderBoard();
+                                if (gameBoard.terminal()) stop(player1, player2);
+                            }, 500);
                         }
                     } else {
-                        if (player2.play(element.dataset.index)) {
+                        if (player2.isPlayerTurn() && player2.play(element.dataset.index)) {
                             player1.changeTurn();
-                            player1.play();
-                            player2.changeTurn();
+
+                            asyncStuff = true;
+                            setTimeout(function () {
+                                asyncStuff = false;
+                                
+                                player1.play();
+                                player2.changeTurn();
+
+                                gameBoard.renderBoard();
+                                if (gameBoard.terminal()) stop(player1, player2);
+                            }, 500);
                         }
                     }
 
                     gameBoard.renderBoard();
 
-                    if (gameBoard.terminal()) stop();
+                    if (gameBoard.terminal()) stop(player1, player2);
                 });
             });
         }
     }
 
-    return {start};
+    return {start, isDoingAsyncStuff};
 })();
 
 // Returns a player object, the play function will be different for the human and the computer.
@@ -484,8 +530,10 @@ const form = (function() {
 
     // Shows the form when user clicks on the start/restart button.
     document.querySelector(".start").addEventListener("click", function(event) {
-        event.stopPropagation();
-        focusForm();
+        if (!game.isDoingAsyncStuff()) {
+            event.stopPropagation();
+            focusForm();
+        }
     });
 
     // Enables or disables the difficulty field based on wether the user checked human or computer. 
@@ -526,9 +574,10 @@ const form = (function() {
 
     const restartButton = document.querySelector(".restart");
     restartButton.addEventListener("click", function (event) {
-        event.stopPropagation();
-
-        game.start(player1, player2);
+       if (!game.isDoingAsyncStuff()) {
+             event.stopPropagation();
+             game.start(player1, player2);
+       }
     });
     
     // Starts the game if the form is valid.
